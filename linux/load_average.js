@@ -9,9 +9,10 @@ function check(socket) {
     if (stdout !== '') {
       // Extract require information from stdout
       data = stdout.split(/\s+/);
-      load_average_1m = data[9].replace(',', '');
-      load_average_5m = data[10].replace(',', '');
-      load_average_15m = data[11].replace(',', '');
+      average_heading = getIndex(data, 'average:');
+      load_average_1m = data[average_heading + 1].replace(',', '');
+      load_average_5m = data[average_heading + 2].replace(',', '');
+      load_average_15m = data[average_heading + 3].replace(',', '');
 
       // Emit successful result to socket as JSON object
       socket.emit('result', {
