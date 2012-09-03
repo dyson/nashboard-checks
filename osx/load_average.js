@@ -1,4 +1,4 @@
-// Checks system load averages over 1m, 5m and 15m using iostat
+// Checks system load averages over 1m, 5m and 15m using uptime
 
 function check(socket) {
 
