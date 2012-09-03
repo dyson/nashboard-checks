@@ -5,16 +5,13 @@ function check(socket) {
 	var exec = require('child_process').exec;
 
 	// Check by spawning a new process to stay non-blocking
-	exec('iostat', function (error, stdout, stderr) {
+	exec('uptime', function (error, stdout, stderr) {
 		if (stdout !== '') {
 			// Extract require information from stdout
-			rows = stdout.split("\n");
-			headings = rows[1].split(/\s+/);
-			data = rows[2].split(/\s+/);
-			load_average_1m_heading = getIndex(headings, '1m');
-			load_average_1m = data[load_average_1m_heading];
-			load_average_5m = data[load_average_1m_heading + 1];
-			load_average_15m = data[load_average_1m_heading + 2];
+			data = stdout.split(/\s+/);
+			load_average_1m = data[9];
+			load_average_5m = data[10];
+			load_average_15m = data[11];
 
 			// Emit successful result to socket as JSON object
 			socket.emit('result', {
