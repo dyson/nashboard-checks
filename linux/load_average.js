@@ -1,36 +1,38 @@
-// Checks system User, System, and Idle cpu usage using iostat
+// Checks system load averages over 1m, 5m and 15m using iostat
 
 function check(socket) {
 
   var exec = require('child_process').exec;
 
   // Check by spawning a new process to stay non-blocking
-  exec('iostat -w 10 -c 2', function (error, stdout, stderr) {
+  exec('uptime', function (error, stdout, stderr) {
     if (stdout !== '') {
       // Extract require information from stdout
-      rows = stdout.split("\n");
-      headings = rows[1].split(/\s+/);
-      data = rows[3].split(/\s+/);
-      cpu_user_heading = getIndex(headings, 'us');
-      cpu_user = data[cpu_user_heading];
-      cpu_system = data[cpu_user_heading + 1];
-      cpu_idle = data[cpu_user_heading + 2];
+      data = stdout.split(/\s+/);
+      load_average_1m = data[9].replace(',', '');
+      load_average_5m = data[10].replace(',', '');
+      load_average_15m = data[11].replace(',', '');
 
       // Emit successful result to socket as JSON object
       socket.emit('result', {
-        check: 'cpu',
+        check: 'load_average',
         success: {
-          cpu_user: cpu_user,
-          cpu_system: cpu_system,
-          cpu_idle: cpu_idle
+          load_average_1m: load_average_1m,
+          load_average_5m: load_average_5m,
+          load_average_15m: load_average_15m
         }
       });
     }
     else if (error !== null) {
       // Emit unsuccessful result to socket as JSON object
       socket.emit('result', {
-        check: 'cpu',
-        error: error
+        check: 'load_average',
+        error: {
+          error: error,
+          killed: error['killed'],
+          code: error['code'],
+          signal: error['signal']
+        }
       });
     }
   });

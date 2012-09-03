@@ -5,16 +5,16 @@ function check(socket) {
   var exec = require('child_process').exec;
 
   // Check by spawning a new process to stay non-blocking
-  exec('iostat -w 10 -c 2', function (error, stdout, stderr) {
+  exec('iostat -c 10 2', function (error, stdout, stderr) {
     if (stdout !== '') {
       // Extract require information from stdout
       rows = stdout.split("\n");
-      headings = rows[1].split(/\s+/);
-      data = rows[3].split(/\s+/);
-      cpu_user_heading = getIndex(headings, 'us');
+      headings = rows[2].split(/\s+/);
+      data = rows[6].split(/\s+/);
+      cpu_user_heading = getIndex(headings, '%user');
       cpu_user = data[cpu_user_heading];
-      cpu_system = data[cpu_user_heading + 1];
-      cpu_idle = data[cpu_user_heading + 2];
+      cpu_system = data[cpu_user_heading + 2];
+      cpu_idle = data[cpu_user_heading + 5];
 
       // Emit successful result to socket as JSON object
       socket.emit('result', {
