@@ -1,4 +1,4 @@
-// Checks system load averages over 1m, 5m and 15m using uptime
+// Checks system uptime using uptime
 
 function check(socket) {
 
@@ -9,25 +9,22 @@ function check(socket) {
     if (stdout !== '') {
       // Extract require information from stdout
       data = stdout.split(/\s+/);
-      average_heading = getIndex(data, 'average:');
-      load_average_1m = data[average_heading + 1].replace(',', '');
-      load_average_5m = data[average_heading + 2].replace(',', '');
-      load_average_15m = data[average_heading + 3].replace(',', '');
+      up_heading = getIndex(data, 'up');
+      uptime = data[up_heading + 1] + ' ' + data[up_heading + 2].replace(',', '');
+      
 
       // Emit successful result to socket as JSON object
       socket.emit('result', {
-        check: 'load_average',
+        check: 'uptime',
         success: {
-          load_average_1m: load_average_1m,
-          load_average_5m: load_average_5m,
-          load_average_15m: load_average_15m
+          uptime: uptime,
         }
       });
     }
     else if (error !== null) {
       // Emit unsuccessful result to socket as JSON object
       socket.emit('result', {
-        check: 'load_average',
+        check: 'uptime',
         error: {
           error: error,
           killed: error['killed'],
