@@ -1,36 +1,39 @@
-// Checks number of users using uptime
+// Checks system mounted disks utilisation (in %)
 
 function check(socket) {
 
   var exec = require('child_process').exec;
 
   // Check by spawning a new process to stay non-blocking
-  exec('uptime', function (error, stdout, stderr) {
+  exec('df', function (error, stdout, stderr) {
     if (stdout !== '') {
       // Extract require information from stdout
-      data = stdout.split(/\s+/);
-      users_heading = getIndex(data, 'users,');
-      users = data[users_heading - 1];
+      rows = stdout.split("\n");
+      headings = rows[0].split(/\s+/);
       
+      
+      disks = [];
+      
+      for (var i = 1; i < rows.length - 1; i++) {
+        data = rows[i].split(/\s+/);
+        mount = data[getIndex(headings, 'Mounted')];
+        used = data[getIndex(headings, 'Use%')].replace('%', '');
+        disks.push({mount: mount, used: used});
+      }
 
       // Emit successful result to socket as JSON object
       socket.emit('result', {
-        check: 'users',
+        check: 'disks',
         success: {
-          users: users,
+          disks: disks
         }
       });
     }
     else if (error !== null) {
       // Emit unsuccessful result to socket as JSON object
       socket.emit('result', {
-        check: 'users',
-        error: {
-          error: error,
-          killed: error['killed'],
-          code: error['code'],
-          signal: error['signal']
-        }
+        check: 'disks',
+        error: error
       });
     }
   });
